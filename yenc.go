@@ -1,3 +1,5 @@
+// Package yenc
+// decoder for yenc encoded binaries (yenc.org)
 package yenc
 
 import(
@@ -12,13 +14,6 @@ import(
    "hash/crc32"
 )
 
-// func decodeYenc(input []byte, offset uint8) ([]byte) {
-//     out := make([]byte,0)
-//     for _,b := range input {
-//         out = append(out, byte((b-offset) & 255))
-//     }
-//     return out
-// }
 
 func parseHeaders(inputBytes []byte) map[string]string {
     values := make(map[string]string)
