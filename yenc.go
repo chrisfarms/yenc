@@ -41,11 +41,11 @@ type Part struct {
     // part num
     Number int
     // size from header
-    hsize int
+    hsize int64
     // size from part trailer
-    Size int
+    Size int64
     // file boundarys
-    Begin,End int
+    Begin,End int64
     // filename from yenc header
     Name string
     // line length of part
@@ -59,7 +59,7 @@ type Part struct {
 
 func (p *Part) validate() os.Error {
     // length checks
-    if len(p.Body) != p.Size {
+    if int64(len(p.Body)) != p.Size {
         return fmt.Errorf("Body size %d did not match expected size %d", len(p.Body), p.Size)
     }
     // crc check
@@ -125,7 +125,7 @@ func (d *decoder) readHeader() (err os.Error) {
         }
         switch kv[0] {
         case "size":
-            d.part.hsize,_ = strconv.Atoi(kv[1])
+            d.part.hsize,_ = strconv.Atoi64(kv[1])
         case "line":
             d.part.cols,_ = strconv.Atoi(kv[1])
         case "part":
@@ -159,9 +159,9 @@ func (d *decoder) readPartHeader() (err os.Error) {
         }
         switch kv[0] {
         case "begin":
-            d.part.Begin,_ = strconv.Atoi(kv[1])
+            d.part.Begin,_ = strconv.Atoi64(kv[1])
         case "end":
-            d.part.End,_ = strconv.Atoi(kv[1])
+            d.part.End,_ = strconv.Atoi64(kv[1])
         }
     }
     return nil 
@@ -177,7 +177,7 @@ func (d *decoder) parseTrailer(line string) os.Error {
         }
         switch kv[0] {
         case "size":
-            d.part.Size,_ = strconv.Atoi(kv[1])
+            d.part.Size,_ = strconv.Atoi64(kv[1])
         case "pcrc32":
             if crc64,err := strconv.Btoui64(kv[1], 16); err == nil {
                 d.part.crc32 = uint32(crc64)
@@ -282,8 +282,7 @@ func (d *decoder) run() os.Error {
 // return a single part from yenc data
 func Decode(input io.Reader) (*Part, os.Error) {
     d := &decoder{buf: bufio.NewReader(input)}
-    err := d.run();
-    if err != nil && err != os.EOF {
+    if err := d.run(); err != nil && err != os.EOF {
         return nil,err
     }
     if len(d.parts) == 0 {
