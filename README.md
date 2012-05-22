@@ -8,16 +8,7 @@ Installation
 
 The easy way:
 
-`goinstall github.com/chrisfarms/yenc`
-
-The old fashioned way:
-
-```
-git clone git://github.com/chrisfarms/yenc.git
-cd yenc
-gotest
-gomake install
-```
+`go get github.com/chrisfarms/yenc`
 
 Docs
 ----
@@ -26,7 +17,7 @@ Decode accepts an io.Reader (of yenc encoded data - complete with headers)
 and returns a *Part.
 
 ```go
-func Decode(input io.Reader) (*Part, os.Error)
+func Decode(input io.Reader) (*Part, error)
 ```
 
 The Part struct contains all the decoded data.
@@ -57,17 +48,21 @@ Example
 -------
 
 ```go
-import "yenc"
-
-f,err := os.Open("some_file.yenc")
-if err != nil {
-    panic("could not open file")
+package main
+import (
+	"github.com/chrisfarms/yenc"
+	"os"
+)
+func main(){
+	f,err := os.Open("some_file.yenc")
+	if err != nil {
+	    panic("could not open file")
+	}
+	part,err := yenc.Decode(f)
+	if err != nil {
+	    panic("decoding: " + err.Error())
+	}
+	fmt.Println("Filename", part.Name)
+	fmt.Println("Body Bytes", part.Body)
 }
-part,err := yenc.Decode(f)
-if err != nil {
-    panic("decoding: " + err.String())
-}
-fmt.Println("Filename", part.Name)
-fmt.Println("Body Bytes", part.Body)
-
 ```
