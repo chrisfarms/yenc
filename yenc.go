@@ -102,7 +102,7 @@ func (d *decoder) readHeader() (err error) {
 	for {
 		s, err = d.buf.ReadString('\n')
 		if err != nil {
-			return io.EOF
+			return err
 		}
 		if len(s) >= 7 && s[:7] == "=ybegin" {
 			break
@@ -285,8 +285,11 @@ func Decode(input io.Reader) (*Part, error) {
 	if len(d.parts) == 0 {
 		return nil, fmt.Errorf("no yenc parts found")
 	}
-	if err := d.validate(); err != nil {
-		return nil, err
+	// validate multipart only if all parts are present
+	if !d.multipart || len(d.parts) == d.parts[len(d.parts)-1].Number {
+		if err := d.validate(); err != nil {
+			return nil, err
+		}
 	}
 	return d.parts[0], nil
 }
