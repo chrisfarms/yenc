@@ -102,7 +102,7 @@ func (d *decoder) readHeader() (err error) {
 	for {
 		s, err = d.buf.ReadString('\n')
 		if err != nil {
-			return io.EOF
+			return err
 		}
 		if len(s) >= 7 && s[:7] == "=ybegin" {
 			break
